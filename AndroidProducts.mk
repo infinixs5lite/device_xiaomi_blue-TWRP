@@ -6,9 +6,7 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/omni_blue.mk
+    $(LOCAL_DIR)/twrp_blue.mk
 
 COMMON_LUNCH_CHOICES := \
-    omni_blue-user \
-    omni_blue-userdebug \
-    omni_blue-eng
+    twrp_blue-eng
