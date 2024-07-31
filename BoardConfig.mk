@@ -56,11 +56,7 @@ TARGET_KERNEL_CONFIG := blue_defconfig
 TARGET_KERNEL_SOURCE := kernel/xiaomi/blue
 
 # Kernel - prebuilt
-TARGET_FORCE_PREBUILT_KERNEL := true
-ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
-BOARD_INCLUDE_DTB_IN_BOOTIMG := 
-endif
 
 # Args
 BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
