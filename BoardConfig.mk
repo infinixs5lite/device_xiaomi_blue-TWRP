@@ -58,6 +58,8 @@ TARGET_KERNEL_SOURCE := kernel/xiaomi/blue
 # Kernel - prebuilt
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
 
+NEED_KERNEL_MODULE_RECOVERY := true
+
 # Args
 BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
 BOARD_MKBOOTIMG_ARGS += --vendor_cmdline $(BOARD_VENDOR_CMDLINE)
