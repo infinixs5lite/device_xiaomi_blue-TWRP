@@ -14,6 +14,10 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 ENABLE_VIRTUAL_AB := true
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
+# generic ramdisk
+$(call inherit-product, $(SRC_TARGET_DIR)/product/generic_ramdisk.mk)
+
+
 # Update Engine & Update Verifier 
 PRODUCT_PACKAGES += \
     update_engine \
