@@ -19,8 +19,8 @@ AB_OTA_PARTITIONS += \
     boot \
     vbmeta_system \
     product \
-    vbmeta_vendor
-    vendorboot
+    vbmeta_vendor \
+    vendorboot \
     vendor_boot
 
 # Architecture
