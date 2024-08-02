@@ -62,6 +62,10 @@ PRODUCT_PACKAGES += \
     android.hardware.health@2.1-impl \
     android.hardware.health@2.1-service
 
+# fstab
+PRODUCT_PACKAGES += \
+    fstab.default.vendor_ramdisk
+
 # Additional Libraries
 TARGET_RECOVERY_DEVICE_MODULES += \
     libkeymaster4 \
