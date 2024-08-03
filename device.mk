@@ -10,6 +10,7 @@ LOCAL_PATH := device/xiaomi/blue
 # Dynamic Partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
+# Virtual a/b
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
 # A/B
