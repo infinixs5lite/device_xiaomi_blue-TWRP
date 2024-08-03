@@ -57,6 +57,7 @@ BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_SEPARATED_DTBO := true
 TARGET_KERNEL_CONFIG := missi_defconfig
 TARGET_KERNEL_SOURCE := kernel/xiaomi/missi
+BOARD_RAMDISK_USE_LZ4 := true
 
 # Kernel - prebuilt
 TARGET_FORCE_PREBUILT_KERNEL := true
