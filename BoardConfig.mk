@@ -13,6 +13,7 @@ BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 BUILD_BROKEN_PREBUILT_ELF_FILES := true
 BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
+SOONG_ALLOW_MISSING_DEPENDENCIES := true
 
 # A/B
 AB_OTA_UPDATER := true
@@ -23,9 +24,7 @@ AB_OTA_PARTITIONS += \
     boot \
     vbmeta_system \
     product \
-    vbmeta_vendor \
-    vendorboot \
-    vendor_boot
+    vbmeta_vendor
 
 # Architecture
 TARGET_ARCH := arm
@@ -47,31 +46,28 @@ TARGET_NO_BOOTLOADER := true
 # Display
 TARGET_SCREEN_DENSITY := 320
 
-# DTB
-ifndef BOARD_PREBUILT_DTBOIMAGE
-BOARD_KERNEL_SEPARATED_DTBO := true
-endif
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
-ifndef TARGET_PREBUILT_DTB
-BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-else
-BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
-endif
-
 # Kernel
-TARGET_NO_KERNEL := true
 BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x40078000
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 \
-androidboot.force_normal_boot=1
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
 BOARD_KERNEL_PAGESIZE := 4096
-BOARD_RAMDISK_OFFSET := 0x11a88000
-BOARD_KERNEL_TAGS_OFFSET := 0x07c88000
-BOARD_RAMDISK_USE_LZ4 := true
-BOARD_DTB_OFFSET := 0x07c88000
+BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+BOARD_KERNEL_IMAGE_NAME := Image
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+BOARD_KERNEL_SEPARATED_DTBO := true
+TARGET_KERNEL_CONFIG := missi_defconfig
+TARGET_KERNEL_SOURCE := kernel/xiaomi/missi
 
-# Vendor command line
-BOARD_VENDOR_CMDLINE := bootopt=64S3,32N2,64N2
+# Kernel - prebuilt
+TARGET_FORCE_PREBUILT_KERNEL := true
+ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
+TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilts/dtb.img
+BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
+BOARD_INCLUDE_DTB_IN_BOOTIMG := 
+BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
+BOARD_KERNEL_SEPARATED_DTBO := 
+endif
 
 # Args
 BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
@@ -83,53 +79,64 @@ BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_TAGS_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
 
-# Kernel - prebuilt
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
-
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_SUPER_PARTITION_SIZE := 9126805504 # TODO: Fix hardcoded value
 
+# properties
+TARGET_SYSTEM_PROP := $(DEVICE_PATH)/system.prop
+
+# Dynamic Partition
+BOARD_SUPER_PARTITION_GROUPS := main
+BOARD_MAIN_SIZE := 9122611200
+BOARD_MAIN_PARTITION_LIST := system \
+                             system_ext \
+                             vendor \
+                             product \
+                             odm \
+                             vendor_dlkm \
+                             odm_dlkm
+
+BOARD_PARTITION_LIST := $(call to-upper, $(BOARD_MAIN_PARTITION_LIST))
+$(foreach p, $(BOARD_PARTITION_LIST), $(eval BOARD_$(p)IMAGE_FILE_SYSTEM_TYPE := erofs))
+$(foreach p, $(BOARD_PARTITION_LIST), $(eval TARGET_COPY_OUT_$(p) := $(call to-lower, $(p))))
+
  # File System
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_SYSTEMIMAGE_PARTITION_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_ODM_DLKIMAGE_FILE_SYSTEM_TYPE := ext4
+
+# Workaround for error copying vendor files to recovery ramdisk
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_COPY_OUT_PRODUCT := product
-TARGET_COPY_OUT_SYSTEM_EXT := system_ext
-
-# Dynamic Partition
-BOARD_MAIN_SIZE := 9122611200
-BOARD_SUPER_PARTITION_GROUPS := main
-BOARD_MAIN_PARTITION_LIST := \
-    system \
-    system_ext \
-    vendor \
-    product \
-    system_ext \
-    vendor_dlkm \
-    odm_dlkm
-
-# Fstab
-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
-
-# properties
-TARGET_SYSTEM_PROP := $(DEVICE_PATH)/system.prop
+TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
+TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
 
 # Recovery
-TARGET_NO_RECOVERY := true
-TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
+TARGET_RECOVERY_PIXEL_FORMAT := BGRA_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+BOARD_USES_VENDOR_DLKMIMAGE := true
+BOARD_USES_ODM_DLKIMAGE := true
+TARGET_NO_RECOVERY := true
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
+
+# System as root
+BOARD_HAS_NO_SELECT_BUTTON := true
+BOARD_SUPPRESS_SECURE_ERASE := true
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
 
 # Vendor_boot recovery ramdisk
-BOARD_USES_GENERIC_KERNEL_IMAGE := true
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := 
-BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := 
+BOARD_USES_RECOVERY_AS_BOOT := 
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
+BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
+BOARD_MOVE_GSI_AVB_KEYS_TO_VENDOR_BOOT := 
+TW_LOAD_VENDOR_BOOT_MODULES := true
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
@@ -143,7 +150,6 @@ TARGET_USES_LOGD := true
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
-BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
 
 # Hack: prevent anti rollback
 BOARD_USES_METADATA_PARTITION := true
