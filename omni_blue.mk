@@ -12,14 +12,14 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 # Installs gsi keys into ramdisk, to boot a developer GSI with verified boot.
 $(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
 
-# Inherit some common TWRP stuff.
-$(call inherit-product, vendor/twrp/config/common.mk)
+# Inherit some common pbrp stuff.
+$(call inherit-product, vendor/pb/config/common.mk)
 
 # Inherit from blue device
 $(call inherit-product, device/xiaomi/blue/device.mk)
 
 PRODUCT_DEVICE := blue
-PRODUCT_NAME := twrp_blue
+PRODUCT_NAME := omni_blue
 PRODUCT_BRAND := Xiaomi
 PRODUCT_MODEL := Redmi A3
 PRODUCT_MANUFACTURER := Xiaomi
